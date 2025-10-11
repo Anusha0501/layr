@@ -4,6 +4,11 @@
 
 Layr is a VS Code extension that generates comprehensive, actionable project plans from natural language descriptions. Whether you're starting a new project or planning a feature, Layr helps you think through the architecture, requirements, and implementation steps before you write the first line of code.
 
+## Demo Video
+
+[![Layr Demo Video](./layr.png)](https://youtu.be/9xtDDoh-Fg8)
+
+
 ## Key Benefits
 
 **Intelligent Planning** : Leverages Google's Gemini AI to create detailed, context-aware project plans tailored to your specific requirements.

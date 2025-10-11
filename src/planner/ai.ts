@@ -10,13 +10,33 @@ export class GeminiPlanGenerator implements PlanGenerator {
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+    console.log('GeminiPlanGenerator: API key received:', apiKey ? '***configured***' : 'empty');
+    console.log('GeminiPlanGenerator: API key length:', apiKey?.length || 0);
+    
     if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_api_key_here') {
       this.genAI = new GoogleGenerativeAI(apiKey);
+      console.log('GeminiPlanGenerator: GoogleGenerativeAI initialized successfully');
+    } else {
+      console.log('GeminiPlanGenerator: API key invalid or placeholder, not initializing AI');
     }
   }
 
   async isAvailable(): Promise<boolean> {
     return this.genAI !== null && this.apiKey.trim() !== '';
+  }
+
+  async testApiKey(): Promise<{ success: boolean; error?: string }> {
+    if (!this.genAI) {
+      return { success: false, error: 'AI not initialized' };
+    }
+
+    try {
+      const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent("Hello");
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
   }
 
   async generatePlan(prompt: string): Promise<ProjectPlan> {

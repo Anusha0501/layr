@@ -12,44 +12,65 @@ export class Planner {
   private config: LayrConfig;
 
   constructor() {
+    // ONLINE ONLY MODE: Disable rule-based generator
     this.ruleGenerator = new RuleBasedPlanGenerator();
     this.config = this.loadConfig();
     this.initializeAIGenerator();
+    
+    console.log('Planner: ONLINE ONLY MODE - Offline templates disabled');
   }
 
   /**
-   * Generate a project plan from a natural language prompt
+   * Generate a project plan from a natural language prompt - ONLINE ONLY MODE
    */
   async generatePlan(prompt: string): Promise<ProjectPlan> {
-    // Try AI generator first if available
-    if (this.aiGenerator && await this.aiGenerator.isAvailable()) {
-      try {
-        const plan = await this.aiGenerator.generatePlan(prompt);
-        vscode.window.showInformationMessage('Plan generated using Gemini AI! 🤖');
-        return plan;
-      } catch (error) {
-        if (error instanceof APIKeyMissingError) {
-          vscode.window.showWarningMessage(
-            'Gemini API key not configured. Using offline mode. Configure your API key in settings for AI-powered plans.'
-          );
-        } else if (error instanceof AIServiceError) {
-          vscode.window.showWarningMessage(
-            `AI service error: ${error.message}. Falling back to offline mode.`
-          );
-        } else {
-          vscode.window.showWarningMessage(
-            'Unexpected error with AI service. Falling back to offline mode.'
-          );
-        }
-        
-        console.error('AI plan generation failed:', error);
-      }
+    console.log('Planner.generatePlan: ONLINE ONLY MODE - Starting plan generation');
+    
+    // Force refresh config to ensure we have the latest API key
+    this.refreshConfig();
+    
+    console.log('Planner.generatePlan: AI generator exists:', !!this.aiGenerator);
+    console.log('Planner.generatePlan: Config API key:', this.config.geminiApiKey ? '***configured***' : 'not set');
+    
+    // REQUIRE AI generator - no offline fallback allowed
+    if (!this.aiGenerator) {
+      const errorMsg = 'ONLINE MODE REQUIRED: No AI generator initialized. Please configure your Gemini API key in VS Code settings or .env file.';
+      console.error('Planner.generatePlan:', errorMsg);
+      vscode.window.showErrorMessage(errorMsg);
+      throw new APIKeyMissingError();
     }
 
-    // Fallback to rule-based generator
-    const plan = await this.ruleGenerator.generatePlan(prompt);
-    vscode.window.showInformationMessage('Plan generated using offline templates! 📋');
-    return plan;
+    const isAvailable = await this.aiGenerator.isAvailable();
+    console.log('Planner.generatePlan: AI generator available:', isAvailable);
+    
+    if (!isAvailable) {
+      const errorMsg = 'ONLINE MODE REQUIRED: AI generator not available. Please check your Gemini API key configuration.';
+      console.error('Planner.generatePlan:', errorMsg);
+      vscode.window.showErrorMessage(errorMsg);
+      throw new APIKeyMissingError();
+    }
+
+    try {
+      console.log('Planner.generatePlan: Attempting AI plan generation');
+      const plan = await this.aiGenerator.generatePlan(prompt);
+      console.log('Planner.generatePlan: AI plan generation successful');
+      vscode.window.showInformationMessage('Plan generated using Gemini AI! 🤖');
+      return plan;
+    } catch (error) {
+      console.error('Planner.generatePlan: AI plan generation failed:', error);
+      
+      let errorMessage = 'ONLINE MODE REQUIRED: AI plan generation failed. ';
+      if (error instanceof APIKeyMissingError) {
+        errorMessage += 'Please configure your Gemini API key.';
+      } else if (error instanceof AIServiceError) {
+        errorMessage += `AI service error: ${error.message}`;
+      } else {
+        errorMessage += 'Unexpected error with AI service.';
+      }
+      
+      vscode.window.showErrorMessage(errorMessage);
+      throw error; // Re-throw the error instead of falling back to offline mode
+    }
   }
 
   /**
@@ -112,9 +133,34 @@ export class Planner {
     this.initializeAIGenerator();
   }
 
+  /**
+   * Debug method to check if AI generator is available
+   */
+  async isAIAvailable(): Promise<boolean> {
+    return this.aiGenerator !== null && await this.aiGenerator.isAvailable();
+  }
+
+  /**
+   * Debug method to test the API key
+   */
+  async testAPIKey(): Promise<{ success: boolean; error?: string }> {
+    if (!this.aiGenerator) {
+      return { success: false, error: 'AI generator not initialized' };
+    }
+    return await this.aiGenerator.testApiKey();
+  }
+
   private loadConfig(): LayrConfig {
     const config = vscode.workspace.getConfiguration('layr');
-    const apiKey = config.get<string>('geminiApiKey') || process.env.GEMINI_API_KEY || '';
+    const settingsApiKey = config.get<string>('geminiApiKey') || '';
+    const envApiKey = process.env.GEMINI_API_KEY || '';
+    const apiKey = settingsApiKey || envApiKey;
+    
+    console.log('Layr Config Debug:', {
+      settingsApiKey: settingsApiKey ? '***configured***' : 'not set',
+      envApiKey: envApiKey ? '***configured***' : 'not set',
+      finalApiKey: apiKey ? '***configured***' : 'not set'
+    });
     
     return {
       geminiApiKey: apiKey
@@ -122,9 +168,16 @@ export class Planner {
   }
 
   private initializeAIGenerator(): void {
-    if (this.config.geminiApiKey && this.config.geminiApiKey.trim() !== '') {
+    console.log('Planner.initializeAIGenerator: Starting AI generator initialization');
+    console.log('Planner.initializeAIGenerator: API key available:', !!this.config.geminiApiKey);
+    console.log('Planner.initializeAIGenerator: API key length:', this.config.geminiApiKey?.length || 0);
+    
+    if (this.config.geminiApiKey && this.config.geminiApiKey.trim() !== '' && this.config.geminiApiKey !== 'your_api_key_here') {
+      console.log('Planner.initializeAIGenerator: Creating GeminiPlanGenerator');
       this.aiGenerator = new GeminiPlanGenerator(this.config.geminiApiKey);
+      console.log('Planner.initializeAIGenerator: AI generator created successfully');
     } else {
+      console.log('Planner.initializeAIGenerator: Invalid or missing API key, AI generator not initialized');
       this.aiGenerator = null;
     }
   }

@@ -1,11 +1,91 @@
 import * as vscode from 'vscode';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs';
 import { planner } from './planner';
+
+// Load environment variables from .env file
+const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+if (workspaceRoot) {
+  const envPath = path.join(workspaceRoot, '.env');
+  console.log('Layr: Attempting to load .env from:', envPath);
+  
+  try {
+    // Try dotenv first
+    dotenv.config({ path: envPath });
+    console.log('Layr: dotenv.config() completed');
+    
+    // Manual fallback - read file directly
+    if (!process.env.GEMINI_API_KEY && fs.existsSync(envPath)) {
+      console.log('Layr: dotenv failed, trying manual file read');
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      console.log('Layr: .env file content length:', envContent.length);
+      
+      const lines = envContent.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('GEMINI_API_KEY=')) {
+          const apiKey = trimmed.split('=')[1];
+          process.env.GEMINI_API_KEY = apiKey;
+          console.log('Layr: Manually set GEMINI_API_KEY from file');
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Layr: Error loading .env:', error);
+  }
+  
+  console.log('Layr: GEMINI_API_KEY after load:', process.env.GEMINI_API_KEY ? '***configured***' : 'not found');
+} else {
+  console.log('Layr: No workspace folder found, trying default .env location');
+  dotenv.config();
+}
 
 /**
  * This method is called when the extension is activated
  */
 export function activate(context: vscode.ExtensionContext) {
+  console.log('Layr Extension: ONLINE ONLY MODE ACTIVATED - Build ' + new Date().toISOString());
   console.log('Layr extension is now active! 🚀');
+
+  // Register debug command to test API key loading
+  const debugCommand = vscode.commands.registerCommand('layr.debug', async () => {
+    const config = vscode.workspace.getConfiguration('layr');
+    const settingsApiKey = config.get<string>('geminiApiKey') || '';
+    const envApiKey = process.env.GEMINI_API_KEY || '';
+    
+    // Test AI generator availability
+    let aiGeneratorStatus = 'unknown';
+    let apiTestResult = 'not tested';
+    try {
+      const isAvailable = await planner.isAIAvailable();
+      aiGeneratorStatus = isAvailable ? 'available' : 'not available';
+      
+      // Test the API key directly if available
+      if (isAvailable) {
+        const testResult = await planner.testAPIKey();
+        apiTestResult = testResult.success ? 'API key works!' : `API error: ${testResult.error}`;
+      }
+    } catch (error) {
+      aiGeneratorStatus = `error: ${error}`;
+    }
+    
+    const message = `Debug Info:
+Settings API Key: ${settingsApiKey ? '***configured***' : 'not set'}
+Environment API Key: ${envApiKey ? '***configured***' : 'not set'}
+Final API Key: ${settingsApiKey || envApiKey ? '***configured***' : 'not set'}
+AI Generator Status: ${aiGeneratorStatus}
+API Test Result: ${apiTestResult}`;
+    
+    vscode.window.showInformationMessage(message);
+    console.log('Layr Debug:', { 
+      settingsApiKey: settingsApiKey ? '***configured***' : 'not set',
+      envApiKey: envApiKey ? '***configured***' : 'not set',
+      aiGeneratorStatus,
+      apiTestResult
+    });
+  });
 
   // Register the "Create Plan" command
   const createPlanCommand = vscode.commands.registerCommand('layr.createPlan', async () => {
@@ -113,6 +193,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Add commands to subscriptions for proper cleanup
   context.subscriptions.push(
+    debugCommand,
     createPlanCommand,
     executePlanCommand,
     configChangeListener

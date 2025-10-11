@@ -1,6 +1,6 @@
 # Layr - AI Planning Layer
 
-** Transform your ideas into structured project plans with AI-powered planning for VS Code.**
+**Transform your ideas into structured project plans with AI-powered planning for VS Code.**
 
 Layr is a VS Code extension that generates comprehensive, actionable project plans from natural language descriptions. Whether you're starting a new project or planning a feature, Layr helps you think through the architecture, requirements, and implementation steps before you write the first line of code.
 

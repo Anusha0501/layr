@@ -1,18 +1,24 @@
 {
   "name": "layr",
   "displayName": "Layr - AI Planning Layer",
-  "description": "A Traycer-inspired planning layer that uses Gemini AI to generate intelligent project plans from natural language prompts",
-  "version": "0.0.2",
+  "description": "Transform your ideas into structured project plans with AI-powered planning for VS Code.",
+  "version": "0.0.3",
   "publisher": "ManasDutta",
   "icon": "layr.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/manasdutta04/layr"
   },
+  "pricing": "Free",
+  "sponsor": {
+    "url": "https://github.com/sponsors/manasdutta04"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
+    "AI",
+    "Planning",
     "Other"
   ],
   "activationEvents": [

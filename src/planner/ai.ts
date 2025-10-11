@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { ProjectPlan, PlanGenerator, AIServiceError, APIKeyMissingError, FileStructureItem, PlanStep } from './interfaces';
 
 /**
@@ -31,7 +31,33 @@ export class GeminiPlanGenerator implements PlanGenerator {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = this.genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 2048,
+            },
+            safetySettings: [
+                {
+                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+            ],
+        });
       const result = await model.generateContent("Hello");
       return { success: true };
     } catch (error) {
@@ -45,56 +71,118 @@ export class GeminiPlanGenerator implements PlanGenerator {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = this.genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 2048,
+            },
+            safetySettings: [
+                {
+                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+            ],
+        });
       
-      const systemPrompt = `You are an expert software architect and project planner. Create a detailed, actionable project plan in JSON format for the following request: "${prompt}"
+      const systemPrompt = `Create a project plan in JSON format for: "${prompt}"
 
-Please respond with a valid JSON object that matches this exact structure:
+Return only valid JSON:
 {
   "title": "Project Title",
-  "overview": "Brief description of what will be built",
-  "requirements": ["requirement 1", "requirement 2", "requirement 3"],
+  "overview": "Brief description",
+  "requirements": ["requirement 1", "requirement 2"],
   "fileStructure": [
     {
       "name": "src",
-      "type": "directory",
+      "type": "directory", 
       "path": "src/",
-      "description": "Source code directory",
-      "children": [
-        {
-          "name": "index.ts",
-          "type": "file",
-          "path": "src/index.ts",
-          "description": "Main entry point"
-        }
-      ]
+      "description": "Source code"
     }
   ],
   "nextSteps": [
     {
       "id": "step1",
-      "description": "Set up project structure",
+      "description": "Setup project",
       "completed": false,
       "priority": "high",
       "estimatedTime": "30 minutes",
       "dependencies": []
     }
   ]
-}
-
-Make the plan comprehensive but practical. Include 5-10 requirements, a logical file structure with 8-15 files/directories, and 6-12 actionable next steps. Focus on modern best practices and include testing, documentation, and deployment considerations.`;
+}`;
 
       const result = await model.generateContent(systemPrompt);
       const response = await result.response;
+      
+      // Check for safety filters or blocked content
+      console.log('GeminiPlanGenerator: Response candidates:', response.candidates?.length || 0);
+      console.log('GeminiPlanGenerator: Finish reason:', response.candidates?.[0]?.finishReason);
+      console.log('GeminiPlanGenerator: Safety ratings:', response.candidates?.[0]?.safetyRatings);
+      
       const text = response.text();
 
-      // Extract JSON from the response (handle cases where AI adds extra text)
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new AIServiceError('Invalid response format from AI service');
+      console.log('GeminiPlanGenerator: Raw AI response:', text);
+      console.log('GeminiPlanGenerator: Response length:', text.length);
+      console.log('GeminiPlanGenerator: Response preview (first 200 chars):', text.substring(0, 200));
+
+      // Check if response is empty due to safety filters
+      if (!text || text.length === 0) {
+        const finishReason = response.candidates?.[0]?.finishReason;
+        if (finishReason === 'SAFETY') {
+          throw new AIServiceError('Content was blocked by safety filters. Please try a different prompt.');
+        } else if (finishReason === 'RECITATION') {
+          throw new AIServiceError('Content was blocked due to recitation concerns. Please try a different prompt.');
+        } else {
+          throw new AIServiceError(`Empty response from AI service. Finish reason: ${finishReason || 'unknown'}`);
+        }
       }
 
-      const planData = JSON.parse(jsonMatch[0]);
+      // Try multiple JSON extraction methods
+      let jsonText = '';
+      
+      // Method 1: Look for JSON between ```json and ``` markers
+      const codeBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        jsonText = codeBlockMatch[1].trim();
+        console.log('GeminiPlanGenerator: Found JSON in code block');
+      } else {
+        // Method 2: Look for JSON object starting with {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          jsonText = jsonMatch[0];
+          console.log('GeminiPlanGenerator: Found JSON object');
+        } else {
+          // Method 3: Try to parse the entire response as JSON
+          try {
+            JSON.parse(text.trim());
+            jsonText = text.trim();
+            console.log('GeminiPlanGenerator: Entire response is valid JSON');
+          } catch {
+            console.log('GeminiPlanGenerator: No valid JSON found in response');
+            console.log('GeminiPlanGenerator: Full response for debugging:', text);
+            throw new AIServiceError('Invalid response format from AI service - no JSON found');
+          }
+        }
+      }
+
+      console.log('GeminiPlanGenerator: Extracted JSON:', jsonText.substring(0, 200) + (jsonText.length > 200 ? '...' : ''));
+
+      const planData = JSON.parse(jsonText);
       
       // Validate and transform the response
       const plan: ProjectPlan = {

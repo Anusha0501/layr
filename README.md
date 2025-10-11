@@ -1,130 +1,178 @@
-# Layr - AI Planning Layer for VS Code
+# Layr - AI Planning Layer
 
- **A "planning layer" that uses AI to generate intelligent project plans from natural language prompts.**
+** Transform your ideas into structured project plans with AI-powered planning for VS Code.**
 
-Layr helps you plan before you code by generating structured, actionable project plans that you can edit and follow step-by-step.
+Layr is a VS Code extension that generates comprehensive, actionable project plans from natural language descriptions. Whether you're starting a new project or planning a feature, Layr helps you think through the architecture, requirements, and implementation steps before you write the first line of code.
 
-##  Features
+## Key Benefits
 
-- 1. AI-Powered Planning: Uses Google's Gemini AI to generate intelligent, detailed project plans
-- 2. Offline Mode: Works without an API key using built-in rule-based templates
-- 3. Markdown Output: Plans are generated as editable Markdown documents
-- 4. Command Palette Integration: Easy access through VS Code's command palette
-- 5. Flexible Configuration: Store API key in settings or environment variables
-- 6. Smart Fallback: Automatically falls back to offline mode if AI service fails
+**Intelligent Planning** : Leverages Google's Gemini AI to create detailed, context-aware project plans tailored to your specific requirements.
 
-##  Quick Start
+**Zero Setup Required** : Works immediately with built-in templates. No API key needed for basic functionality.
 
-### 1. Installation
+**Seamless Integration** : Native VS Code integration through Command Palette with instant access to planning tools.
 
+**Flexible Output** : Generates editable Markdown documents that you can customize and reference throughout development.
+
+**Smart Fallback** : Automatically switches to offline template mode if AI service is unavailable.
+
+**Secure Configuration** : Multiple options for API key storage with built-in security best practices.
+
+## Installation
+
+### From VS Code Marketplace
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search for "Layr"
+4. Click Install
+
+### From Source
 1. Clone this repository
 2. Open in VS Code
-3. Run `npm install` to install dependencies
-4. Press `F5` to launch the extension in a new Extension Development Host window
+3. Run `npm install`
+4. Press F5 to launch in Extension Development Host
 
-### 2. Configuration (Optional)
+## Configuration
 
-For AI-powered plans, configure your Gemini API key:
+### AI-Powered Plans (Optional)
 
-**Option A: VS Code Settings (Recommended)**
+To enable AI-generated plans, configure your Gemini API key using one of these methods:
+
+**Method 1: VS Code Settings UI (Recommended)**
 1. Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Open VS Code Settings (`Ctrl+,`)
+2. Open VS Code Settings (Ctrl+,)
 3. Search for "layr"
-4. Enter your Gemini API key in the "Gemini Api Key" field
+4. Enter your API key in the "Gemini Api Key" field
 
-**Option B: VS Code Settings File**
+**Method 2: Settings File**
 1. Copy `.vscode/settings.example.json` to `.vscode/settings.json`
 2. Replace `YOUR_GEMINI_API_KEY_HERE` with your actual API key
-3. The settings.json file is automatically ignored by git for security
+3. The settings.json file is automatically ignored by git
 
-**Option C: Environment Variable**
-1. Add to your `.env` file:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-⚠️ **Security Note**: Never commit API keys to version control. The extension is configured to keep your API key secure.
-
-### 3. Usage
-
-1. Open the Command Palette (`Ctrl+Shift+P`)
-2. Type "Layr: Create Plan"
-3. Enter what you want to build (e.g., "A React todo app with authentication")
-4. Wait for the plan to generate
-5. Edit and follow the generated plan!
-
-##  Commands
-
-| Command | Description |
-|---------|-------------|
-| `Layr: Create Plan` | Generate a new project plan from your description |
-| `Layr: Execute Plan` | Execute the current plan (coming soon!) |
-
-##  Project Structure
-
+**Method 3: Environment Variable**
+Add to your `.env` file:
 ```
-layr/
-├── src/
-│   ├── extension.ts           # Main extension entry point
-│   └── planner/
-│       ├── index.ts          # Main planner orchestrator
-│       ├── ai.ts             # Gemini AI integration
-│       ├── rules.ts          # Offline template system
-│       └── interfaces.ts     # TypeScript interfaces
-├── .vscode/
-│   ├── launch.json           # Debug configuration
-│   └── tasks.json            # Build tasks
-├── package.json              # Extension manifest
-├── tsconfig.json             # TypeScript configuration
-├── .env                      # Environment variables
-└── README.md                 # This file
+GEMINI_API_KEY=your_api_key_here
 ```
 
-## AI vs Offline Mode
+**Security Note** : API keys are stored locally and never transmitted except to Google's Gemini API. The extension is configured to prevent accidental commits of sensitive information.
+
+## Usage Guide
+
+### Creating a Plan
+
+1. **Open Command Palette** : Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+2. **Run Command** : Type "Layr: Create Plan" and press Enter
+3. **Describe Your Project** : Enter a natural language description of what you want to build
+   - Example: "A React todo app with user authentication and real-time updates"
+   - Example: "A REST API for a blog platform with user management"
+   - Example: "A Python data analysis script for sales reporting"
+4. **Review Generated Plan** : The extension will create a new Markdown file with your project plan
+5. **Customize as Needed** : Edit the generated plan to match your specific requirements
+
+### Best Practices for Prompts
+
+**Be Specific** : Include technology preferences, key features, and constraints
+- Good: "A Node.js REST API with JWT authentication, PostgreSQL database, and Docker deployment"
+- Basic: "A web API"
+
+**Mention Context** : Include information about scale, audience, or special requirements
+- "A mobile-first React app for small businesses with offline capability"
+- "A Python script for processing large CSV files with memory optimization"
+
+**Include Constraints** : Mention any limitations or preferences
+- "Using only free/open-source technologies"
+- "Must be deployable on AWS Lambda"
+
+## Available Commands
+
+| Command | Description | Shortcut |
+|---------|-------------|----------|
+| `Layr: Create Plan` | Generate a new project plan from description | None |
+| `Layr: Execute Plan` | Execute current plan (coming soon) | None |
+
+## Plan Output Structure
+
+Generated plans include:
+
+**Project Overview** : High-level description and objectives
+**Requirements** : Functional and technical requirements
+**Architecture** : System design and component structure
+**Technology Stack** : Recommended tools and frameworks
+**Implementation Steps** : Detailed development phases
+**File Structure** : Suggested project organization
+**Testing Strategy** : Approach for quality assurance
+**Deployment**  : Production deployment considerations
+
+## AI vs Template Mode
 
 ### AI Mode (Gemini)
-- **Pros**: Intelligent, context-aware plans tailored to your specific request
-- **Cons**: Requires API key and internet connection
-- **Best for**: Complex, unique projects that need custom planning
+**Advantages** :
+- Highly customized plans based on your specific description
+- Considers modern best practices and current technologies
+- Adapts to complex or unique project requirements
+- Provides detailed explanations and rationale
 
-### Offline Mode (Templates)
-- **Pros**: Works anywhere, no setup required, instant generation
-- **Cons**: Limited to predefined templates
-- **Best for**: Common project types (web apps, APIs, mobile apps)
+**Requirements** :
+- Internet connection
+- Valid Gemini API key
+- Google AI Studio account
 
-## Example Plan Output
+**Best For** : Complex projects, modern tech stacks, unique requirements
 
-```markdown
-# React Todo App with Authentication - Web Application Project
+### Template Mode (Offline - currently on testing)
+**Advantages** :
+- Works without internet connection
+- No API key required
+- Instant generation
+- Consistent structure
 
-*Generated on 12/28/2024 at 2:30:15 PM using Gemini AI*
+**Limitations** :
+- Limited to predefined project types
+- Less customization
+- May not reflect latest technologies
 
-## Overview
-A modern web application with responsive design and interactive features. This plan was generated based on your request: "A React todo app with authentication"
+**Best For** : Common project patterns, quick prototyping, offline development
 
-## Requirements
-- User authentication (login/register)
-- Todo CRUD operations
-- Responsive design for mobile and desktop
-- Modern JavaScript framework (React)
-- State management (Redux/Context)
-- Backend API integration
-- Testing framework (Jest)
+## Troubleshooting
 
-## File Structure
-```
-📁 src/
-  📁 components/
-    📄 TodoList.jsx
-    📄 TodoItem.jsx
-    📄 AuthForm.jsx
-  📁 pages/
-    📄 Dashboard.jsx
-    📄 Login.jsx
-  📄 App.jsx
-📄 package.json
-📄 README.md
-```
+### Common Issues
+
+**"Failed to generate plan"**
+- Check internet connection
+- Verify API key is correctly configured
+- Try using template mode as fallback
+
+**"API key not found"**
+- Ensure API key is set in VS Code settings
+- Check that the key is valid and active
+- Verify the key has appropriate permissions
+
+**"Extension not responding"**
+- Reload VS Code window (Ctrl+Shift+P → "Developer: Reload Window")
+- Check VS Code output panel for error messages
+- Ensure extension is properly installed and enabled
+
+### Getting Help
+
+- Check the [GitHub repository](https://github.com/manasdutta04/layr) for known issues
+- Review VS Code's extension troubleshooting guide
+- Submit bug reports with detailed error messages and steps to reproduce
+
+## Privacy and Security
+
+- API keys are stored locally in VS Code settings
+- No data is collected or transmitted except to Google's Gemini API
+- Generated plans remain on your local machine
+- All communication with external services uses secure HTTPS connections
+
+## Contributing
+
+Contributions are welcome! Please see the repository for development setup instructions and contribution guidelines.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 
 ##  Development

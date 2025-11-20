@@ -1,0 +1,38 @@
+# VS Code Extension Ignore File
+
+# Source files
+src/**
+tsconfig.json
+.vscode/**
+.vscode-test/**
+.gitignore
+.github/**
+
+# Build artifacts
+*.vsix
+
+# Environment and config files
+.env
+.env.example
+
+# Node modules
+node_modules/**
+
+# Documentation for development
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Git files
+.git/**
+.gitattributes
+
+# Test files
+test/**
+**/*.test.ts
+**/*.spec.ts
+
+# Development files
+**/.DS_Store
+**/*.map

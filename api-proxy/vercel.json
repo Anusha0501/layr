@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "env": {
-    "GROQ_API_KEY": "@groq-api-key"
-  },
   "functions": {
     "api/chat.js": {
       "memory": 1024,

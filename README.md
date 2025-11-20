@@ -2,7 +2,18 @@
 
 **Transform your ideas into structured project plans with AI-powered planning for VS Code.**
 
-Layr is a VS Code extension that generates comprehensive, actionable project plans from natural language descriptions. Whether you're starting a new project or planning a feature, Layr helps you think through the architecture, requirements, and implementation steps before you write the first line of code.
+Layr is a VS Code extension that generates comprehensive, actionable project plans from natural language descriptions. **Now with pre-configured Groq integration - start using AI planning instantly without any setup!**
+
+ Quick Start - No Configuration Needed!
+
+Layr comes **pre-configured with Groq AI** - just install and start planning immediately:
+
+1. Install the extension
+2. Press `Ctrl+Shift+P` and type "Layr: Create Plan"
+3. Describe your project
+4. Get your AI-generated plan instantly!
+
+**No API keys, no configuration, no waiting - just install and use!**
 
 ## Demo Video
 
@@ -11,15 +22,17 @@ Layr is a VS Code extension that generates comprehensive, actionable project pla
 
 ## Key Benefits
 
-**Intelligent Planning** : Leverages Google's Gemini AI to create detailed, context-aware project plans tailored to your specific requirements.
+**Zero Setup Required** : Pre-configured with Groq AI for instant use - no API key needed!
 
-**Zero Setup Required** : Works immediately with built-in templates. No API key needed for basic functionality.
+**Lightning Fast** : Powered by Groq's ultra-fast inference infrastructure for near-instant results.
+
+**Intelligent Planning** : Leverages advanced LLMs (Llama 3.3) to create detailed, context-aware project plans.
 
 **Seamless Integration** : Native VS Code integration through Command Palette with instant access to planning tools.
 
 **Flexible Output** : Generates editable Markdown documents that you can customize and reference throughout development.
 
-**Smart Fallback** : Automatically switches to offline template mode if AI service is unavailable.
+**Multi-Provider Support** : Optional support for Gemini, OpenAI, and Claude if you prefer other AI providers.
 
 **Secure Configuration** : Multiple options for API key storage with built-in security best practices.
 
@@ -39,48 +52,32 @@ Layr is a VS Code extension that generates comprehensive, actionable project pla
 
 ## Configuration
 
-### AI-Powered Plans 
+### No Configuration Needed!
 
-Layr now supports multiple AI providers! Choose from Gemini, OpenAI, or Claude to generate your project plans.
+**Layr is 100% pre-configured!** Just install and start using it immediately.
 
-**Step 1: Choose Your AI Provider**
-1. Open VS Code Settings (Ctrl+,)
-2. Search for "layr"
-3. Set "AI Provider" to your preferred option:
-   - `gemini` (default) - Google's Gemini AI
-   - `openai` - OpenAI's GPT models
-   - `claude` - Anthropic's Claude models
+- ✅ No API keys to enter
+- ✅ No settings to configure  
+- ✅ No account required
+- ✅ No setup steps
 
-**Step 2: Configure API Key**
+**It just works!** ⚡
 
-**For Gemini:**
-1. Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Enter your API key in the "Gemini Api Key" field
+The extension comes with Groq AI built-in, providing:
+- **Ultra-fast** responses (1-3 seconds)
+- **Powerful AI** (Llama 3.3 70B model)
+- **Completely free** for you to use
+- **Secure** - your data stays private
 
-**For OpenAI:**
-1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Enter your API key in the "OpenAI Api Key" field
-3. Optionally set your organization ID in "OpenAI Organization"
+### For Developers: Using Your Own Groq Key
 
-**For Claude:**
-1. Get your API key from [Anthropic Console](https://console.anthropic.com/)
-2. Enter your API key in the "Claude Api Key" field
+If you're forking this extension or want to use your own Groq API key:
 
-**Step 3: Choose Model (Optional)**
-- Gemini Model: `gemini-pro` (default) or `gemini-pro-vision`
-- OpenAI Model: `gpt-4` (default), `gpt-4-turbo`, or `gpt-3.5-turbo`
-- Claude Model: `claude-3-sonnet` (default), `claude-3-opus`, or `claude-3-haiku`
+1. Get a free API key from [Groq Console](https://console.groq.com/keys)
+2. Add to `.env` file: `GROQ_API_KEY=your_key_here`
+3. Or embed it in `src/planner/providers/groq.ts`
 
-**Alternative: Environment Variables**
-Add to your `.env` file or system environment:
-```bash
-# Choose one or more based on your preferred provider
-GEMINI_API_KEY=your_gemini_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-CLAUDE_API_KEY=your_claude_api_key_here
-```
-
-**Security Note** : API keys are stored locally and never transmitted except to the respective AI provider's API. The extension is configured to prevent accidental commits of sensitive information.
+See `GROQ_SETUP.md` for detailed instructions.
 
 ## Usage Guide
 
@@ -129,25 +126,29 @@ Generated plans include:
 **Testing Strategy** : Approach for quality assurance
 **Deployment**  : Production deployment considerations
 
-## AI vs Template Mode
+## AI-Powered Planning
 
-### AI Mode (Gemini)
+### Default: Groq AI
 **Advantages** :
-- Highly customized plans based on your specific description
-- Considers modern best practices and current technologies
-- Adapts to complex or unique project requirements
-- Provides detailed explanations and rationale
+- **Ultra-fast** - Get plans in seconds, not minutes
+- **Free to use** - Pre-configured, no setup required
+- **Highly accurate** - Powered by Llama 3.3 70B
+- **No account needed** - Works immediately after install
+- **State-of-the-art** - Latest open-source models
 
 **Requirements** :
 - Internet connection
-- Valid Gemini API key
-- Google AI Studio account
+- That's it! Pre-configured and ready to go
 
-**Best For** : Complex projects, modern tech stacks, unique requirements
+**Best For** : Everyone! Fast, free, and powerful - perfect for all projects
 
-### Template Mode (Offline - currently on testing)
-**Advantages** :
-- Works without internet connection
+### Alternative AI Providers (on request | paid)
+You can optionally use:
+- **Gemini** - Google's multimodal AI
+- **OpenAI** - GPT-4 and other OpenAI models  
+- **Claude** - Anthropic's Claude models
+
+All provide detailed, customized plans but require your own API keys.
 - No API key required
 - Instant generation
 - Consistent structure

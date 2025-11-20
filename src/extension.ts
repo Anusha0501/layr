@@ -12,36 +12,33 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Layr Extension: ONLINE ONLY MODE ACTIVATED - Build ' + new Date().toISOString());
   console.log('Layr extension is now active! 🚀');
 
-  // Load environment variables from .env file
-  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  console.log('Layr: Workspace root:', workspaceRoot);
-
-  if (workspaceRoot) {
-    const envPath = path.join(workspaceRoot, '.env');
-    console.log('Layr: Attempting to load .env from:', envPath);
-    console.log('Layr: .env file exists:', fs.existsSync(envPath));
-    
+  // Load environment variables from .env file in extension directory
+  const extensionRoot = context.extensionPath;
+  const envPath = path.join(extensionRoot, '.env');
+  console.log('Layr: Extension root:', extensionRoot);
+  console.log('Layr: Attempting to load .env from:', envPath);
+  console.log('Layr: .env file exists:', fs.existsSync(envPath));
+  
+  if (fs.existsSync(envPath)) {
     try {
-      // Try dotenv first
+      // Load .env from extension directory
       const result = dotenv.config({ path: envPath });
       console.log('Layr: dotenv.config() result:', result.error ? 'ERROR: ' + result.error : 'SUCCESS');
-      console.log('Layr: GEMINI_API_KEY after dotenv:', process.env.GEMINI_API_KEY ? '***configured***' : 'not found');
+      console.log('Layr: GROQ_API_KEY after dotenv:', process.env.GROQ_API_KEY ? '***configured***' : 'not found');
       
       // Manual fallback - read file directly
-      if (!process.env.GEMINI_API_KEY && fs.existsSync(envPath)) {
+      if (!process.env.GROQ_API_KEY) {
         console.log('Layr: dotenv failed, trying manual file read');
         const envContent = fs.readFileSync(envPath, 'utf8');
         console.log('Layr: .env file content length:', envContent.length);
-        console.log('Layr: .env file content preview:', envContent.substring(0, 100));
         
         const lines = envContent.split('\n');
         for (const line of lines) {
           const trimmed = line.trim();
-          console.log('Layr: Processing line:', trimmed.substring(0, 20) + '...');
-          if (trimmed.startsWith('GEMINI_API_KEY=')) {
-            const apiKey = trimmed.split('=')[1];
-            process.env.GEMINI_API_KEY = apiKey;
-            console.log('Layr: Manually set GEMINI_API_KEY from file, length:', apiKey?.length);
+          if (trimmed.startsWith('GROQ_API_KEY=')) {
+            const apiKey = trimmed.substring('GROQ_API_KEY='.length).trim();
+            process.env.GROQ_API_KEY = apiKey;
+            console.log('Layr: Manually set GROQ_API_KEY from file, length:', apiKey?.length);
             break;
           }
         }
@@ -50,86 +47,46 @@ export function activate(context: vscode.ExtensionContext) {
       console.log('Layr: Error loading .env:', error);
     }
     
-    console.log('Layr: Final GEMINI_API_KEY status:', process.env.GEMINI_API_KEY ? '***configured*** (length: ' + process.env.GEMINI_API_KEY.length + ')' : 'not found');
+    console.log('Layr: Final GROQ_API_KEY status:', process.env.GROQ_API_KEY ? '***configured*** (length: ' + process.env.GROQ_API_KEY.length + ')' : 'not found');
   } else {
-    console.log('Layr: No workspace folder found, trying default .env location');
-    dotenv.config();
+    console.log('Layr: No .env file found in extension directory');
   }
 
   // Refresh planner configuration after .env is loaded
   console.log('Layr: Refreshing planner configuration after .env load');
   planner.refreshConfig();
 
-  // Register debug command to test API key loading
+  // Register debug command to test Groq integration
   const debugCommand = vscode.commands.registerCommand('layr.debug', async () => {
-    const config = vscode.workspace.getConfiguration('layr');
-    
-    // Get unified model configuration
-    const selectedModel = config.get<string>('aiModel') || 'gemini-2.5-flash';
-    const apiKey = config.get<string>('apiKey') || '';
-    
-    // Determine provider from model name
-    let selectedProvider = 'gemini';
-    if (selectedModel.startsWith('gemini')) {
-      selectedProvider = 'gemini';
-    } else if (selectedModel.startsWith('gpt') || selectedModel.startsWith('o3')) {
-      selectedProvider = 'openai';
-    } else if (selectedModel.startsWith('claude')) {
-      selectedProvider = 'claude';
-    } else if (selectedModel.startsWith('kimi') || selectedModel.startsWith('deepseek') || selectedModel.startsWith('grok')) {
-      selectedProvider = 'openai'; // Default to OpenAI for other models
-    }
-    
-    // Get API keys from configuration or environment variables (fallback)
-    const geminiApiKey = selectedProvider === 'gemini' ? apiKey : process.env.GEMINI_API_KEY || '';
-    const openaiApiKey = selectedProvider === 'openai' ? apiKey : process.env.OPENAI_API_KEY || '';
-    const claudeApiKey = selectedProvider === 'claude' ? apiKey : process.env.CLAUDE_API_KEY || '';
-    
     // Test AI provider availability
     let aiProviderStatus = 'unknown';
     let apiTestResult = 'not tested';
     try {
       const isAvailable = await planner.isAIAvailable();
-      aiProviderStatus = isAvailable ? 'available' : 'not available';
+      aiProviderStatus = isAvailable ? '✅ Ready' : '❌ Not Available';
       
       // Test the API key directly if available
       if (isAvailable) {
         const testResult = await planner.testAPIKey();
-        apiTestResult = testResult.success ? 'API key works!' : `API error: ${testResult.error}`;
+        apiTestResult = testResult.success ? '✅ Working perfectly!' : `❌ Error: ${testResult.error}`;
       }
     } catch (error) {
-      aiProviderStatus = `error: ${error}`;
+      aiProviderStatus = `❌ Error: ${error}`;
     }
     
-    const message = `Layr Debug Information
+    const message = `Layr Status (Pre-configured with Groq)
 
-Selected Model: ${selectedModel}
-Determined Provider: ${selectedProvider}
-API Key: ${apiKey ? '***configured***' : 'not set'}
-OpenAI Org: ${config.get<string>('openaiOrganization') || 'not set'}
+🤖 AI Provider: Groq (Llama 3.3 70B)
+⚡ Status: ${aiProviderStatus}
+🔑 API Test: ${apiTestResult}
 
-Provider Status:
-• Gemini: ${geminiApiKey ? 'configured' : 'not set'}
-• OpenAI: ${openaiApiKey ? 'configured' : 'not set'}
-• Claude: ${claudeApiKey ? 'configured' : 'not set'}
-
-AI Generator: ${aiProviderStatus}
-Test Result: ${apiTestResult}
-
-Raw Config:
-${JSON.stringify({
-      selectedModel,
-      determinedProvider: selectedProvider,
-      apiKey: apiKey ? '***configured***' : 'not set'
-    }, null, 2)}`;
+No configuration needed - ready to use!
+Just run "Layr: Create Plan" to get started.`;
     
     vscode.window.showInformationMessage(message);
-    console.log('Layr Multi-Provider Debug:', { 
-      selectedModel,
-      determinedProvider: selectedProvider,
-      geminiApiKey: geminiApiKey ? '***configured***' : 'not set',
-      openaiApiKey: openaiApiKey ? '***configured***' : 'not set',
-      claudeApiKey: claudeApiKey ? '***configured***' : 'not set',
+    console.log('Layr Status:', { 
+      provider: 'Groq',
+      model: 'llama-3.3-70b-versatile',
       aiProviderStatus,
       apiTestResult
     });

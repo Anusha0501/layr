@@ -1,7 +1,7 @@
 {
   "name": "layr",
   "displayName": "Layr - AI Planning Layer",
-  "description": "Transform your ideas into structured project plans with AI-powered planning for VS Code.",
+  "description": "AI-powered project planning that just works! Pre-configured with Groq - install and start planning instantly. Zero configuration required.",
   "version": "0.1.2",
   "publisher": "ManasDutta",
   "icon": "layr.png",
@@ -48,52 +48,7 @@
     ],
     "configuration": {
       "title": "Layr",
-      "properties": {
-        "layr.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "API Key for your selected AI provider",
-          "scope": "application",
-          "order": 1
-        },
-        "layr.aiModel": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-1.5-pro",
-            "gemini-1.5-flash",
-            "gemini-pro",
-            "gpt-4",
-            "gpt-4-turbo",
-            "gpt-3.5-turbo",
-            "gpt-4o",
-            "gpt-5-medium",
-            "gpt-5-high",
-            "claude-3-sonnet",
-            "claude-3-opus",
-            "claude-3-haiku",
-            "claude-3.7-sonnet",
-            "claude-4-sonnet",
-            "kimi-k2-0905",
-            "deepseek-v3.1",
-            "grok-4",
-            "o3"
-          ],
-          "default": "gemini-2.5-flash",
-          "order": 2,
-          "description": "AI model to use",
-          "scope": "application",
-          "order": 3
-        },
-        "layr.openaiOrganization": {
-          "type": "string",
-          "default": "",
-          "description": "OpenAI Organization ID (optional, only for OpenAI)",
-          "scope": "application",
-          "order": 6
-        }
-      }
+      "properties": {}
     }
   },
   "scripts": {

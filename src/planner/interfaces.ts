@@ -1,7 +1,7 @@
 /**
  * Supported AI providers
  */
-export type AIProviderType = 'gemini' | 'openai' | 'claude' | 'kimi' | 'deepseek' | 'grok' | 'o3';
+export type AIProviderType = 'gemini' | 'groq';
 
 /**
  * Gemini AI configuration
@@ -12,53 +12,11 @@ export interface GeminiConfig {
 }
 
 /**
- * OpenAI configuration
+ * Groq AI configuration
  */
-export interface OpenAIConfig {
+export interface GroqConfig {
   apiKey: string;
-  model?: 'gpt-4' | 'gpt-4-turbo' | 'gpt-3.5-turbo' | 'gpt-4o' | 'gpt-5-medium' | 'gpt-5-high' | 'kimi-k2-0905' | 'deepseek-v3.1' | 'grok-4' | 'o3';
-  organization?: string;
-}
-
-/**
- * Claude AI configuration
- */
-export interface ClaudeConfig {
-  apiKey: string;
-  model?: 'claude-3-sonnet' | 'claude-3-opus' | 'claude-3-haiku' | 'claude-3.7-sonnet' | 'claude-4-sonnet';
-}
-
-/**
- * Kimi AI configuration (Moonshot AI)
- */
-export interface KimiConfig {
-  apiKey: string;
-  model?: 'kimi-k2-0905' | 'moonshot-v1-8k' | 'moonshot-v1-32k' | 'moonshot-v1-128k';
-}
-
-/**
- * DeepSeek AI configuration
- */
-export interface DeepseekConfig {
-  apiKey: string;
-  model?: 'deepseek-v3.1' | 'deepseek-chat' | 'deepseek-coder';
-}
-
-/**
- * Grok AI configuration (xAI)
- */
-export interface GrokConfig {
-  apiKey: string;
-  model?: 'grok-4' | 'grok-3' | 'grok-2';
-}
-
-/**
- * O3 AI configuration (OpenAI O3)
- */
-export interface O3Config {
-  apiKey: string;
-  model?: 'o3' | 'o3-mini';
-  organization?: string;
+  model?: 'llama-3.3-70b-versatile' | 'llama-3.1-70b-versatile' | 'llama-3.1-8b-instant' | 'mixtral-8x7b-32768' | 'gemma2-9b-it';
 }
 
 /**
@@ -68,15 +26,10 @@ export interface LayrConfig {
   // Legacy support
   geminiApiKey?: string;
   
-  // New multi-provider configuration
+  // Multi-provider configuration
   aiProvider?: AIProviderType;
   gemini?: GeminiConfig;
-  openai?: OpenAIConfig;
-  claude?: ClaudeConfig;
-  kimi?: KimiConfig;
-  deepseek?: DeepseekConfig;
-  grok?: GrokConfig;
-  o3?: O3Config;
+  groq?: GroqConfig;
 }
 
 /**

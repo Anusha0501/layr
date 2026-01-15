@@ -36,9 +36,9 @@ jobs:
             let message = '';
 
             if (eventName === 'pull_request_target' && payload.action === 'opened') {
-              message = `Hi @${author}! 👋
+              message = `Hi @$${author}! 👋
 
-**Thanks for contributing to ${repo}!** 🎉
+**Thanks for contributing to $${repo}!** 🎉
 We appreciate your effort and will review your changes soon.
 
 ---
@@ -51,7 +51,7 @@ We appreciate your effort and will review your changes soon.
               if (payload.pull_request.merged) {
                  message = `**PR Merged!** 
 
-Awesome work, @${author}! Your contribution has been added. 
+Awesome work, @$${author}! Your contribution has been added. 
 Looking forward to more changes from you in the future! 🔥
 
 ---
@@ -62,7 +62,7 @@ Looking forward to more changes from you in the future! 🔥
               } else {
                  message = `**PR Closed**
 
-Thanks for your interest, @${author}. Even though this wasn't merged, we appreciate the effort!
+Thanks for your interest, @$${author}. Even though this wasn't merged, we appreciate the effort!
 
 ---
 
@@ -75,7 +75,7 @@ Thanks for your interest, @${author}. Even though this wasn't merged, we appreci
             else if (eventName === 'issues' && payload.action === 'closed') {
               message = `**Issue Resolved!**
 
-Thanks for helping us maintain the repo, @${author}. 
+Thanks for helping us maintain the repo, @$${author}. 
 If you have more ideas, feel free to open a new issue!
 
 ---
